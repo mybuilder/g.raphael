@@ -1,5 +1,5 @@
 /*!
- * g.Raphael 0.51 - Charting library, based on Raphaël
+ * g.Raphael 0.51 - Charting library, based on Rapha�l
  *
  * Copyright (c) 2009-2012 Dmitry Baranovskiy (http://g.raphaeljs.com)
  * Licensed under the MIT (http://www.opensource.org/licenses/mit-license.php) license.
@@ -40,7 +40,7 @@
  > Usage
  | r.piechart(cx, cy, r, values, opts)
  \*/
- 
+
 (function () {
 
     function Piechart(paper, cx, cy, r, values, opts) {
@@ -53,7 +53,7 @@
             series = paper.set(),
             order = [],
             len = values.length,
-            angle = 0,
+            angle = opts.startFromFixedAngle || 0,
             total = 0,
             others = 0,
             cut = opts.maxSlices || 100,
@@ -94,12 +94,14 @@
                 total += values[i];
                 values[i] = { value: values[i], order: i, valueOf: function () { return this.value; } };
             }
-            
+
             //values are sorted numerically
-            values.sort(function (a, b) {
-                return b.value - a.value;
-            });
-            
+            if (opts.sort !== false) {
+                values.sort(function (a, b) {
+                    return b.value - a.value;
+                });
+            }
+
             for (i = 0; i < len; i++) {
                 if (defcut && values[i] * 100 / total < minPercent) {
                     cut = i;
@@ -118,11 +120,15 @@
             others && values.splice(len) && (values[cut].others = true);
 
             for (i = 0; i < len; i++) {
-                var mangle = angle - 360 * values[i] / total / 2;
-
-                if (!i) {
-                    angle = 90 - mangle;
+                var mangle;
+                if (opts.startFromFixedAngle)
+                    mangle = angle + 360 * values[i] / total / 2;
+                else {
                     mangle = angle - 360 * values[i] / total / 2;
+                    if (!i) {
+                        angle = 90 - mangle;
+                        mangle = angle - 360 * values[i] / total / 2;
+                    }
                 }
 
                 if (opts.init) {
@@ -282,15 +288,15 @@
 
         return chart;
     };
-    
+
     //inheritance
     var F = function() {};
     F.prototype = Raphael.g;
     Piechart.prototype = new F;
-    
+
     //public
     Raphael.fn.piechart = function(cx, cy, r, values, opts) {
         return new Piechart(this, cx, cy, r, values, opts);
     }
-    
+
 })();
